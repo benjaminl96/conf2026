@@ -1,0 +1,75 @@
+{
+  "name": "conf2026",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite build --watch",
+    "buildDebug": "vite build --minify=false",
+    "lint": "eslint src vite.config.js eslint.config.js",
+    "format": "prettier --ignore-unknown --write 'src/**/*.{js,jsx}'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "husky",
+    "preview": "vite preview",
+    "bundle-report": "npx vite-bundle-visualizer"
+  },
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
+    "@mui/styled-engine-sc": "^7.3.1",
+    "@splunk/react-page": "^7.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.8"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.22.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-import-resolver-vite": "^2.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "fs-extra": "^11.2.0",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "jsdom": "^29.0.2",
+    "lint-staged": "^15.5.0",
+    "prettier": "3.6.2",
+    "release-it": "^19.0.4",
+    "release-it-splunk-conf-bumper": "^1.0.1",
+    "vite": "^7.1.3",
+    "vite-bundle-visualizer": "^1.2.1",
+    "vitest": "^4.1.4"
+  },
+  "lint-staged": {
+    "*.{js,jsx,css,json,md,svg}": "prettier --write --ignore-unknown",
+    "src/**/*.{js,jsx}": "eslint --fix",
+    "vite.config.js": "eslint --fix",
+    "eslint.config.js": "eslint --fix"
+  },
+  "overrides": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@splunk/react-page": {
+      "styled-components": "^6.1.8"
+    }
+  }
+}

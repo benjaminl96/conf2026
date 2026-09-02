@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "Splunk React App",
+    "id": {
+      "group": null,
+      "name": "conf2026",
+      "version": "0.1.0"
+    },
+    "author": [
+      {
+        "name": "Your Team",
+        "email": null,
+        "company": null
+      }
+    ],
+    "releaseDate": null,
+    "description": "React application template for Splunk",
+    "classification": {
+      "intendedAudience": null,
+      "categories": [],
+      "developmentStatus": "Development"
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": null,
+      "text": "./LICENSE.txt",
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": "./README.txt",
+      "uri": null
+    }
+  },
+  "dependencies": null,
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": ["*"],
+  "targetWorkloads": ["_search_heads"]
+}

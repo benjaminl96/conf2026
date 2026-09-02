@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<view template="conf2026:/static/dist/index.html" type="html">
+  <label>Home</label>
+</view>

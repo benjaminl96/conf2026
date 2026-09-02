@@ -1,0 +1,89 @@
+version: '3'
+
+vars:
+  APP_NAME:
+    sh: node -p "require('./package.json').name"
+  APP_VERSION:
+    sh: node -p "require('./package.json').version"
+  APP_DIR: app
+  PACKAGE_DIR: dist
+  PACKAGE_PATH: '{{.PACKAGE_DIR}}/{{.APP_NAME}}-{{.APP_VERSION}}.tar.gz'
+  BUILD_DIR: '{{.PACKAGE_DIR}}/{{.APP_NAME}}'
+  VENV_DIR: .venv
+  PYTHON_EXE: '{{.PYTHON_EXE | default "python3"}}'
+  APPINSPECT_OUTPUT: ./appinspect.json
+
+tasks:
+  npm-deps:
+    desc: Install npm dependencies
+    method: checksum
+    cmds:
+      - npm ci
+    sources:
+      - package.json
+      - package-lock.json
+    generates:
+      - node_modules/**/*
+
+  venv:
+    desc: Create Python virtual environment and install Splunk packaging tools
+    cmds:
+      - '{{.PYTHON_EXE}} -c ''import sys; assert (3,9) <= sys.version_info, "Python 3.9+ required"'''
+      - '{{.PYTHON_EXE}} -m venv {{.VENV_DIR}}'
+      - '{{.VENV_DIR}}/bin/pip3 -qq install splunk-appinspect splunk-packaging-toolkit'
+    status:
+      - test -f {{.VENV_DIR}}/bin/slim
+      - test -f {{.VENV_DIR}}/bin/splunk-appinspect
+
+  build:
+    desc: Build the Vite assets
+    deps: [npm-deps]
+    cmds:
+      - npm run build
+    sources:
+      - src/**/*
+      - public/**/*
+      - index.html
+      - package.json
+      - vite.config.js
+    generates:
+      - '{{.APP_DIR}}/appserver/static/dist/**/*'
+
+  package:
+    desc: Package the Splunk app into a tarball
+    deps: [venv, build]
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+      - mkdir -p {{.BUILD_DIR}}
+      - cp -r {{.APP_DIR}}/* {{.BUILD_DIR}}
+      - rm -rf {{.BUILD_DIR}}/local {{.BUILD_DIR}}/metadata/local.meta
+      - find {{.BUILD_DIR}} -type d -exec chmod 755 {} +
+      - find {{.BUILD_DIR}} -type f -exec chmod 644 {} +
+      - '{{.VENV_DIR}}/bin/slim package {{.BUILD_DIR}} -o {{.PACKAGE_DIR}}'
+    sources:
+      - '{{.APP_DIR}}/**/*'
+    generates:
+      - '{{.PACKAGE_PATH}}'
+
+  inspect:
+    desc: Run AppInspect (add ` -- --mode precert` for verbose output)
+    deps: [package]
+    cmds:
+      - |
+        {{.VENV_DIR}}/bin/splunk-appinspect inspect {{.PACKAGE_PATH}} \
+          --excluded-tags aarch64_compatibility \
+          --data-format json \
+          --output-file {{.APPINSPECT_OUTPUT}} \
+          --max-messages all {{.CLI_ARGS}}
+
+  clean:
+    desc: Clean generated build and packaging artifacts
+    cmds:
+      - rm -rf {{.PACKAGE_DIR}} {{.APPINSPECT_OUTPUT}}
+      - rm -rf {{.APP_DIR}}/appserver/static/dist
+
+  clean-all:
+    desc: Clean all generated artifacts, dependencies, and the virtual environment
+    cmds:
+      - task: clean
+      - rm -rf {{.VENV_DIR}} node_modules

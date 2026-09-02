@@ -1,0 +1,25 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+app/appserver/static/dist/
+appinspect*.json
+coverage/
+.venv/
+.task/
+
+# Splunk local state
+app/local/
+app/metadata/local.meta
+local/
+local.meta
+
+# Local configuration and editor files
+.env
+*.local
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+*.py[cod]
+AGENTS.local.md

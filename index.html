@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Splunk React App</title>
+  </head>
+  <body>
+    <script src="/config?autoload=1" crossorigin="use-credentials"></script>
+    <script src="/static/js/i18n.js"></script>
+    <script src="/i18ncatalog?autoload=1"></script>
+    <script>
+      __splunkd_partials__ = ${json_decode(splunkd)};
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

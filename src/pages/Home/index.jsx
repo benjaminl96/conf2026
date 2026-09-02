@@ -51,7 +51,7 @@ export default function Home() {
                 Team conventions included
               </Typography>
               <Typography color='text.secondary' sx={{ mt: 1 }}>
-                Atlas-derived build, lint, test, release, package, and AppInspect workflows.
+                Build, lint, test, release, package, and AppInspect workflows are ready to use.
               </Typography>
             </CardContent>
           </Card>

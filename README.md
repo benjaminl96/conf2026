@@ -1,8 +1,8 @@
 # Splunk React App Template
 
-An Atlas-derived starting point for building React applications that run as Splunk apps. The repository preserves
-the team's frontend build, code-quality, release, packaging, and AppInspect conventions while intentionally shipping
-only one small demo view.
+A starting point for building React applications that run as Splunk apps. The repository includes the team's
+frontend build, code-quality, release, packaging, and AppInspect conventions while intentionally shipping only one
+small demo view.
 
 ## What is included
 
@@ -13,10 +13,10 @@ only one small demo view.
 - ESLint, Prettier, Vitest, lint-staged, Husky, and Conventional Commits
 - Taskfile workflows for build, package, cleanup, and AppInspect
 - Release It configuration that keeps Splunk version metadata synchronized
-- An Atlas-inspired, hello-world home page
+- A small hello-world home page
 
-Atlas-specific features, searches, REST handlers, Python commands, lookups, premium licenses, legacy JavaScript, and
-compiled assets are deliberately excluded.
+Feature-specific searches, REST handlers, Python commands, lookups, premium licenses, legacy JavaScript, and compiled
+assets are deliberately excluded.
 
 ## Requirements
 

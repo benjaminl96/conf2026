@@ -1,9 +1,48 @@
-atlas4Pipeline([
-  appName: 'conf2026',
-  repoUrl: 'git@github.com:benjaminl96/conf2026.git',
-  nodeJsVersion: '24.x',
-  cleanCommand: 'task clean',
-  buildCommand: 'task package',
-  inspectCommand: 'task inspect',
-  enableAppInspect: true,
-])
+pipeline {
+  agent any
+
+  tools {
+    nodejs '24.x'
+  }
+
+  stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
+      }
+    }
+
+    stage('Validate') {
+      parallel {
+        stage('Lint') {
+          steps {
+            sh 'npm run lint'
+          }
+        }
+        stage('Test') {
+          steps {
+            sh 'npm test'
+          }
+        }
+      }
+    }
+
+    stage('Package') {
+      steps {
+        sh 'task package'
+      }
+    }
+
+    stage('Inspect') {
+      steps {
+        sh 'task inspect'
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'dist/*.tar.gz, appinspect.json', allowEmptyArchive: true
+    }
+  }
+}

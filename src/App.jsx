@@ -10,9 +10,10 @@ import {
   Typography,
   createTheme,
 } from '@mui/material';
-import { Dashboard, Route as RouteIcon, VisibilityOff } from '@mui/icons-material';
+import { Dashboard, MenuBook, Route as RouteIcon, VisibilityOff } from '@mui/icons-material';
 import { BrowserRouter, Link as RouterLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Home from '$pages/Home';
+import Showcase from '$pages/Showcase';
 import HomeSubPage from '$pages/HomeSubPage';
 import ReactOnly from '$pages/ReactOnly';
 
@@ -50,6 +51,12 @@ const navItems = [
     isActive: ({ pathname }) => pathname === REACT_ONLY_TOP_LEVEL_ROUTE,
     label: 'Top-level route',
     to: REACT_ONLY_TOP_LEVEL_ROUTE,
+  },
+  {
+    icon: <MenuBook />,
+    isActive: ({ pathname }) => pathname === '/showcase',
+    label: 'Showcase',
+    to: '/showcase',
   },
 ];
 
@@ -107,6 +114,7 @@ function AppRoutes() {
       <Routes>
         <Route path='/' element={<Navigate to={HOME_ROUTE} replace />} />
         <Route path={HOME_ROUTE} element={<HomeRoute />} />
+        <Route path='/showcase' element={<Showcase />} />
         <Route path={REACT_ONLY_TOP_LEVEL_ROUTE} element={<ReactOnly />} />
         <Route path='*' element={<Navigate to={HOME_ROUTE} replace />} />
       </Routes>

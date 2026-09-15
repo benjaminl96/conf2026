@@ -2,9 +2,9 @@ import { AutoAwesome, Hub, Layers, LinkOff } from '@mui/icons-material';
 import { Box, Chip, Container, Stack, Typography } from '@mui/material';
 
 const signalCards = [
-  { icon: <Layers />, label: 'React route', value: 'Client-side' },
-  { icon: <Hub />, label: 'Splunk view file', value: 'None' },
-  { icon: <LinkOff />, label: 'Navigation entry', value: 'Unavailable' },
+  { icon: <Layers />, label: 'Browser path', value: '/en-US/app/conf2026/react-only' },
+  { icon: <Hub />, label: 'Splunk view file', value: 'Missing' },
+  { icon: <LinkOff />, label: 'Direct load', value: 'Server controlled' },
 ];
 
 export default function ReactOnly() {
@@ -25,15 +25,16 @@ export default function ReactOnly() {
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Chip
                 icon={<AutoAwesome />}
-                label='Single page app route'
+                label='Top-level app route'
                 sx={{ mb: 3, borderRadius: '8px', bgcolor: '#0f172a', color: 'common.white' }}
               />
               <Typography component='h1' variant='h2' fontWeight={800} gutterBottom>
-                React can show more than Splunk navigation knows about.
+                This top-level route has no Splunk template.
               </Typography>
               <Typography variant='h6' sx={{ maxWidth: 720, color: '#486581', lineHeight: 1.6 }}>
-                This page does not have a Splunk XML template, so it cannot be navigated to through a Splunk nav link.
-                It is rendered only after the React app loads and the client-side route changes.
+                React Router can render this page after the Home view has already loaded the app. But a direct visit or
+                refresh at /en-US/app/conf2026/react-only is controlled by Splunk&apos;s server, and this repo
+                intentionally does not include an XML template for that top-level view.
               </Typography>
             </Box>
 

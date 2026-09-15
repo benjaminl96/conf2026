@@ -1,10 +1,21 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import useSearchJob from './useSearchJob';
 
 export default function useLog() {
-  const [events, setEvents] = useState([]);
-  const log = useCallback((message, details = {}) => {
-    console.log('[useLog]', message, details);
-    setEvents((current) => [{ id: crypto.randomUUID(), message, details, time: new Date() }, ...current].slice(0, 5));
-  }, []);
-  return { events, log };
+  const { searchJob } = useSearchJob();
+
+  const log = useCallback(
+    async ({ action, message, details = {}, index = 'main', sourcetype, source }) => {
+      const event = JSON.stringify({ action, message, details });
+      const escapedEvent = event.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      console.log('[useLog] write', { action, message, details, index, sourcetype, source });
+      const { sid, content } = await searchJob({
+        search: `| makeresults | eval _raw="${escapedEvent}" | collect index=${index} sourcetype="${sourcetype}" source="${source}"`,
+      });
+      return { sid, content };
+    },
+    [searchJob]
+  );
+
+  return { log };
 }

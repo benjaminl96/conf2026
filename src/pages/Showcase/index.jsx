@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { DataGrid } from '@mui/x-data-grid';
 import {
   Box,
+  Alert,
   Button,
   Card,
   CardContent,
@@ -18,6 +19,9 @@ import EditOutlined from '@mui/icons-material/EditOutlined';
 import useKVStore from '$hooks/useKVStore';
 import useLog from '$hooks/useLog';
 import useSearchJob from '$hooks/useSearchJob';
+
+const COLLECTION = 'butterfly_journal';
+const COLUMN_STORAGE_KEY = 'conf2026:showcase:columnVisibility';
 
 const seed = [
   [
@@ -76,7 +80,7 @@ const seed = [
   ],
   ['Northern Metalmark', 'Calephelis borealis', 'Riodinidae', false, true, 'orange', 'brown', 'Prefers rocky habitats'],
 ].map((row, index) => ({
-  id: index + 1,
+  _key: String(index + 1),
   commonName: row[0],
   scientificName: row[1],
   family: row[2],
@@ -88,13 +92,75 @@ const seed = [
 }));
 
 const familyNames = ['Hedylidae', 'Hesperiidae', 'Lycaenidae', 'Nymphalidae', 'Papilionidae', 'Pieridae', 'Riodinidae'];
-
-export default function Home() {
-  const { data: rows, save } = useKVStore('butterflies', seed);
-  const { events, log } = useLog();
+export default function Showcase() {
+  const { error, isLoading, getCollection, editCollectionEntry, postCollectionEntries } = useKVStore();
+  const [rows, setRows] = useState([]);
+  const { log } = useLog();
   const { searchJob } = useSearchJob();
+  const [events, setEvents] = useState([]);
   const [selection, setSelection] = useState({ type: 'include', ids: new Set() });
   const [filterModel, setFilterModel] = useState({ items: [] });
+  const selectedKeys =
+    selection.type === 'exclude'
+      ? rows.map((row) => row._key).filter((key) => !selection.ids.has(key))
+      : [...selection.ids];
+  const selectedKeySet = new Set(selectedKeys);
+  const selectedRows = rows.filter((row) => selectedKeySet.has(row._key));
+  const allSelectedCollected = selectedRows.length > 0 && selectedRows.every((row) => row.collected);
+  const allSelectedPriority = selectedRows.length > 0 && selectedRows.every((row) => row.priority);
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(COLUMN_STORAGE_KEY)) || {};
+    } catch {
+      return {};
+    }
+  });
+  const refreshActivity = useCallback(async () => {
+    console.log('[action] refresh recent activity');
+    const { results } = await searchJob({
+      search:
+        'search index=main sourcetype=butterfly_journal | spath input=_raw path=message output=activity_message | sort 0 - _time | head 5 | eval activity_date=strftime(_time, "%a %b %d"), activity_time=strftime(_time, "%I:%M:%S %p") | table activity_date activity_time activity_message',
+    });
+    setEvents(
+      results.map((event, index) => ({ id: `${event.activity_date}-${event.activity_time}-${index}`, ...event }))
+    );
+  }, [searchJob]);
+  const appendPendingActivity = useCallback(
+    (message, sid) => {
+      setEvents((current) =>
+        [
+          { id: sid, activity_date: 'Pending indexing', activity_time: '—', activity_message: message },
+          ...current,
+        ].slice(0, 5)
+      );
+      window.setTimeout(() => {
+        refreshActivity().catch((activityError) =>
+          console.error('[action] delayed activity refresh failed', activityError)
+        );
+      }, 2000);
+    },
+    [refreshActivity]
+  );
+  useEffect(() => {
+    refreshActivity().catch((activityError) => console.error('[action] recent activity failed', activityError));
+  }, [refreshActivity]);
+  useEffect(() => {
+    localStorage.removeItem('conf2026:butterflies');
+    let active = true;
+    const load = async () => {
+      let records = await getCollection(COLLECTION);
+      if (!records.length) {
+        console.log('[action] seed KV Store', { collection: COLLECTION, count: seed.length });
+        await postCollectionEntries(COLLECTION, seed);
+        records = await getCollection(COLLECTION);
+      }
+      if (active) setRows(records);
+    };
+    load().catch((loadError) => console.error('[action] load butterflies failed', loadError));
+    return () => {
+      active = false;
+    };
+  }, [getCollection, postCollectionEntries]);
   const stats = useMemo(() => {
     const collected = rows.filter((row) => row.collected).length;
     const priority = rows.filter((row) => row.priority).length;
@@ -102,27 +168,52 @@ export default function Home() {
     const colors = ['blue', 'brown', 'orange', 'yellow', 'white', 'black', 'gray'].map(
       (color) => rows.filter((row) => row.primaryColor === color).length
     );
-    return { collected, priority, families, colors, completion: Math.round((collected / rows.length) * 100) };
+    return {
+      collected,
+      priority,
+      families,
+      colors,
+      completion: rows.length ? Math.round((collected / rows.length) * 100) : 0,
+    };
   }, [rows]);
-  const updateRows = (nextRows, message) => {
-    save(nextRows);
-    log(message, { count: nextRows.length });
-    searchJob({ id: 'butterfly-dashboard', data: nextRows });
-  };
-  const bulkUpdate = (field, value) => {
-    console.log('[action] bulk update', { field, value, ids: [...selection.ids] });
-    updateRows(
-      rows.map((row) => (selection.ids.has(row.id) ? { ...row, [field]: value } : row)),
-      `Updated ${selection.ids.size} butterflies`
-    );
+  const bulkUpdate = async (field, value) => {
+    console.log('[action] bulk update', { field, value, ids: selectedKeys });
+    const changed = rows.filter((row) => selectedKeySet.has(row._key)).map((row) => ({ ...row, [field]: value }));
+    await postCollectionEntries(COLLECTION, changed);
+    setRows(rows.map((row) => (selectedKeySet.has(row._key) ? { ...row, [field]: value } : row)));
+    const verb = field === 'collected' ? (value ? 'Obtained' : 'Removed') : value ? 'Prioritized' : 'Deprioritized';
+    const suffix = field === 'collected' && !value ? ' from collection' : '';
+    const subject = changed.length === 1 ? changed[0].commonName : `${changed.length} species`;
+    const message = `${verb} ${subject}${suffix}`;
+    const { sid } = await log({
+      action: 'bulk_update',
+      message,
+      details: { field, value, keys: selectedKeys },
+      sourcetype: 'butterfly_journal',
+      source: 'Butterfly Field Journal',
+    });
+    appendPendingActivity(message, sid);
     setSelection({ type: 'include', ids: new Set() });
   };
-  const processRowUpdate = (updated) => {
+  const processRowUpdate = async (updated) => {
     console.log('[action] inline edit', updated);
-    updateRows(
-      rows.map((row) => (row.id === updated.id ? updated : row)),
-      `Updated ${updated.commonName}`
+    const original = rows.find((row) => row._key === updated._key);
+    const changedFields = Object.keys(updated).filter(
+      (field) => updated[field] !== original?.[field] && field !== '_key'
     );
+    const { _key, ...values } = updated;
+    await editCollectionEntry(COLLECTION, _key, values);
+    setRows(rows.map((row) => (row._key === _key ? updated : row)));
+    const fieldLabel = changedFields.map((field) => field.charAt(0).toUpperCase() + field.slice(1)).join(', ');
+    const message = `Updated ${updated.commonName}'s ${fieldLabel}`;
+    const { sid } = await log({
+      action: 'edit',
+      message,
+      details: { key: _key, fields: changedFields },
+      sourcetype: 'butterfly_journal',
+      source: 'Butterfly Field Journal',
+    });
+    appendPendingActivity(message, sid);
     return updated;
   };
   const filterBy = (field, value) => {
@@ -142,6 +233,13 @@ export default function Home() {
     label: color,
     color: colorValues[color] || color,
   }));
+  const activityGroups = events.reduce((groups, event) => {
+    const date = event.activity_date;
+    const existingGroup = groups.find((group) => group.date === date);
+    if (existingGroup) existingGroup.events.push(event);
+    else groups.push({ date, events: [event] });
+    return groups;
+  }, []);
   const editableHeader = (label) => (
     <Stack direction='row' alignItems='center' gap={0.5}>
       <span>{label}</span>
@@ -186,11 +284,21 @@ export default function Home() {
               Butterfly Field Journal
             </Typography>
             <Typography color='text.secondary'>
-              A reactive collection dashboard powered by hooks, charts, and a free MUI DataGrid.
+              A reactive collection dashboard powered by splunk utils, hooks, a KV store, and MUI charts and DataGrid.
             </Typography>
           </Box>
-          <Chip icon={<Refresh />} label='Local KV Store demo' color='success' variant='outlined' />
+          <Chip
+            icon={<Refresh />}
+            label={isLoading ? 'Syncing butterfly_journal…' : 'KV Store: butterfly_journal'}
+            color={error ? 'error' : 'success'}
+            variant='outlined'
+          />
         </Stack>
+        {error && (
+          <Alert severity='error' sx={{ mb: 2 }}>
+            {error.message}
+          </Alert>
+        )}
         <Box
           sx={{
             display: 'grid',
@@ -251,11 +359,21 @@ export default function Home() {
           <Card>
             <CardContent>
               <Typography fontWeight={700}>Recent activity</Typography>
-              {events.length ? (
-                events.map((event) => (
-                  <Typography key={event.id} variant='body2' sx={{ mt: 1 }}>
-                    {event.message}
-                  </Typography>
+              {activityGroups.length ? (
+                activityGroups.map((group) => (
+                  <Box key={group.date} sx={{ mt: 1.5 }}>
+                    <Typography variant='caption' fontWeight={700} color='text.secondary'>
+                      {group.date}
+                    </Typography>
+                    {group.events.map((event) => (
+                      <Stack key={event.id} direction='row' spacing={1.25} sx={{ mt: 0.75 }}>
+                        <Typography component='time' variant='body2' color='text.secondary' sx={{ flexShrink: 0 }}>
+                          {event.activity_time}
+                        </Typography>
+                        <Typography variant='body2'>{event.activity_message}</Typography>
+                      </Stack>
+                    ))}
+                  </Box>
                 ))
               ) : (
                 <Typography color='text.secondary' sx={{ mt: 2 }}>
@@ -273,28 +391,36 @@ export default function Home() {
             <Button
               size='small'
               startIcon={<Check />}
-              disabled={!selection.ids.size}
-              onClick={() => bulkUpdate('collected', true)}
+              disabled={!selectedKeys.length}
+              onClick={() => bulkUpdate('collected', !allSelectedCollected)}
             >
-              Mark collected
+              {allSelectedCollected ? 'Remove' : 'Mark collected'}
             </Button>
             <Button
               size='small'
               startIcon={<Flag />}
-              disabled={!selection.ids.size}
-              onClick={() => bulkUpdate('priority', true)}
+              disabled={!selectedKeys.length}
+              onClick={() => bulkUpdate('priority', !allSelectedPriority)}
             >
-              Mark priority
+              {allSelectedPriority ? 'Deprioritize' : 'Mark priority'}
             </Button>
           </Toolbar>
           <Box sx={{ height: 560, width: '100%' }}>
             <DataGrid
               rows={rows}
+              getRowId={(row) => row._key}
               columns={columns}
+              loading={isLoading}
               checkboxSelection
               disableRowSelectionOnClick
               showToolbar
               filterModel={filterModel}
+              columnVisibilityModel={columnVisibilityModel}
+              onColumnVisibilityModelChange={(model) => {
+                console.log('[action] column visibility', model);
+                localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(model));
+                setColumnVisibilityModel(model);
+              }}
               onFilterModelChange={(model) => {
                 console.log('[action] grid filter', model);
                 setFilterModel(model);

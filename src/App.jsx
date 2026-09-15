@@ -70,7 +70,7 @@ function AppNavigation() {
   const location = useLocation();
 
   return (
-    <AppBar position='sticky' color='inherit' elevation={0} sx={{ borderBottom: '1px solid #d9e2ec' }}>
+    <AppBar position='sticky' color='inherit' elevation={0} sx={{ borderBottom: '1px solid #d9e2ec', zIndex: 10 }}>
       <Container maxWidth='lg'>
         <Toolbar disableGutters sx={{ minHeight: 68, gap: 3 }}>
           <Typography component='div' variant='h6' fontWeight={800} sx={{ flexShrink: 0 }}>

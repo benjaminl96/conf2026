@@ -1,21 +1,33 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import useSplunkAPI from './useSplunkAPI';
 
-export default function useKVStore(collection, seed) {
-  const storageKey = `conf2026:${collection}`;
-  const [data, setData] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey)) || seed;
-    } catch {
-      return seed;
-    }
-  });
-  useEffect(() => localStorage.setItem(storageKey, JSON.stringify(data)), [data, storageKey]);
-  const save = useCallback(
-    (records) => {
-      console.log('[useKVStore] save', { collection, count: records.length });
-      setData(records);
-    },
-    [collection]
+export default function useKVStore(app = 'conf2026') {
+  const { error, isLoading, sendRequest } = useSplunkAPI();
+  const getCollection = useCallback(
+    (collection) => sendRequest(`storage/collections/data/${collection}`, app, 'GET', 'application/json'),
+    [app, sendRequest]
   );
-  return { data, save, isLoading: false, error: null };
+  const editCollectionEntry = useCallback(
+    (collection, key, values) =>
+      sendRequest(
+        `storage/collections/data/${collection}/${encodeURIComponent(key)}`,
+        app,
+        'POST',
+        'application/json',
+        JSON.stringify(values)
+      ),
+    [app, sendRequest]
+  );
+  const postCollectionEntries = useCallback(
+    (collection, values) =>
+      sendRequest(
+        `storage/collections/data/${collection}/batch_save`,
+        app,
+        'POST',
+        'application/json',
+        JSON.stringify(values)
+      ),
+    [app, sendRequest]
+  );
+  return { error, isLoading, getCollection, editCollectionEntry, postCollectionEntries };
 }

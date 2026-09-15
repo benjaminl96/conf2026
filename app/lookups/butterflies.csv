@@ -1,0 +1,11 @@
+common_name,scientific_name,family,collected,priority,primary_color,secondary_color,notes,habitat,region,flight_season
+American Snout,Libytheana carinenta,Nymphalidae,true,false,brown,orange,Often found near hackberry trees,Woodlands,North America,Spring-Fall
+Common Buckeye,Junonia coenia,Nymphalidae,false,true,brown,orange,Look for eyespots on the wings,Open fields,North America,Spring-Fall
+Eastern Tiger Swallowtail,Papilio glaucus,Papilionidae,true,false,yellow,black,Large and easy to identify,Forests and gardens,North America,Spring-Summer
+Cabbage White,Pieris rapae,Pieridae,true,false,white,gray,Common garden visitor,Gardens,North America,Spring-Fall
+Spring Azure,Celastrina ladon,Lycaenidae,false,true,blue,gray,Small blue butterfly,Meadows,North America,Spring
+Common Checkered-Skipper,Pyrgus communis,Hesperiidae,false,false,gray,white,Often rests with wings spread,Fields,North America,Spring-Fall
+Red-spotted Purple,Limenitis arthemis,Nymphalidae,true,true,blue,red,Dark wings with red spots,Woodlands,North America,Summer
+Eight-spotted Forester,Alypia octomaculata,Hedylidae,false,true,black,white,Distinct white wing spots,Woodlands,North America,Spring-Summer
+Red-banded Hairstreak,Calycopis cecrops,Lycaenidae,false,false,brown,red,Often found near oak trees,Woodlands,North America,Spring-Fall
+Northern Metalmark,Calephelis borealis,Riodinidae,false,true,orange,brown,Prefers rocky habitats,Rocky areas,North America,Summer

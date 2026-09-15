@@ -10,9 +10,10 @@ import {
   Typography,
   createTheme,
 } from '@mui/material';
-import { Dashboard, Route as RouteIcon, VisibilityOff } from '@mui/icons-material';
+import { Dashboard, MenuBook, Route as RouteIcon, VisibilityOff } from '@mui/icons-material';
 import { BrowserRouter, Link as RouterLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Home from '$pages/Home';
+import Showcase from '$pages/Showcase';
 import HomeSubPage from '$pages/HomeSubPage';
 import ReactOnly from '$pages/ReactOnly';
 
@@ -51,6 +52,12 @@ const navItems = [
     label: 'Top-level route',
     to: REACT_ONLY_TOP_LEVEL_ROUTE,
   },
+  {
+    icon: <MenuBook />,
+    isActive: ({ pathname }) => pathname === '/showcase',
+    label: 'Showcase',
+    to: '/showcase',
+  },
 ];
 
 function getSplunkAppBasename() {
@@ -63,7 +70,7 @@ function AppNavigation() {
   const location = useLocation();
 
   return (
-    <AppBar position='sticky' color='inherit' elevation={0} sx={{ borderBottom: '1px solid #d9e2ec' }}>
+    <AppBar position='sticky' color='inherit' elevation={0} sx={{ borderBottom: '1px solid #d9e2ec', zIndex: 10 }}>
       <Container maxWidth='lg'>
         <Toolbar disableGutters sx={{ minHeight: 68, gap: 3 }}>
           <Typography component='div' variant='h6' fontWeight={800} sx={{ flexShrink: 0 }}>
@@ -107,6 +114,7 @@ function AppRoutes() {
       <Routes>
         <Route path='/' element={<Navigate to={HOME_ROUTE} replace />} />
         <Route path={HOME_ROUTE} element={<HomeRoute />} />
+        <Route path='/showcase' element={<Showcase />} />
         <Route path={REACT_ONLY_TOP_LEVEL_ROUTE} element={<ReactOnly />} />
         <Route path='*' element={<Navigate to={HOME_ROUTE} replace />} />
       </Routes>

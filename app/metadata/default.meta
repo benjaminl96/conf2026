@@ -10,3 +10,10 @@ access = read : [ * ], write : [ admin, sc_admin ]
 
 [views/dashboard_studio_hello]
 access = read : [ * ], write : [ admin, sc_admin ]
+
+[views/showcase]
+access = read : [ * ], write : [ admin, sc_admin ]
+
+[collections/butterfly_journal]
+access = read : [ * ], write : [ * ]
+export = system

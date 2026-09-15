@@ -9,6 +9,7 @@ const SPLUNK_APP_ID = 'conf2026';
 export const viteResolveAlias = {
   $components: resolve(__dirname, './src/components'),
   $pages: resolve(__dirname, './src/pages'),
+  $hooks: resolve(__dirname, './src/hooks'),
 };
 
 export const viteConfigObj = {

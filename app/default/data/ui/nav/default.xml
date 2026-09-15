@@ -1,3 +1,5 @@
 <nav>
   <view name="home" default="true" icon="home" />
+  <view name="simple_xml_hello" label="Simple XML Hello" icon="dashboard" />
+  <view name="dashboard_studio_hello" label="Dashboard Studio Hello" icon="dashboard" />
 </nav>

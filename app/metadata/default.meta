@@ -4,3 +4,9 @@ access = read : [ * ], write : [ admin, sc_admin ]
 
 [views/home]
 access = read : [ * ], write : [ admin, sc_admin ]
+
+[views/simple_xml_hello]
+access = read : [ * ], write : [ admin, sc_admin ]
+
+[views/dashboard_studio_hello]
+access = read : [ * ], write : [ admin, sc_admin ]

@@ -1,0 +1,92 @@
+<form version="1.1" theme="light">
+  <label>Simple XML Hello</label>
+  <description>A small landing page built with Splunk Simple XML.</description>
+
+  <search id="simple_xml_demo">
+    <query>
+      | makeresults
+      | eval framework="Splunk Simple XML", route="Splunk view", template="app/default/data/ui/views/simple_xml_hello.xml", experience="Traditional dashboard"
+      | table framework route template experience
+    </query>
+  </search>
+
+  <search id="framework_comparison">
+    <query>
+      | makeresults count=3
+      | streamstats count
+      | eval framework=case(count=1, "Simple XML", count=2, "Dashboard Studio", count=3, "React SPA")
+      | eval navigation=case(count=1, 1, count=2, 1, count=3, 0)
+      | eval label=case(navigation=1, "Has Splunk XML view", navigation=0, "Client route only")
+      | table framework navigation label
+    </query>
+  </search>
+
+  <row id="simple_xml_title_row">
+    <panel>
+      <title>Hello from Splunk Simple XML</title>
+      <single>
+        <search base="simple_xml_demo">
+          <query>| stats count as count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x006d9c"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="underLabel">Traditional Splunk dashboard powered by XML rows and panels</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Framework</title>
+      <single>
+        <search base="simple_xml_demo">
+          <query>| fields framework | rename framework as value</query>
+        </search>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="underLabel">Declared in a Simple XML form</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>View Metadata</title>
+      <table>
+        <search base="simple_xml_demo">
+          <query>| rename framework as Framework, route as Route, template as Template, experience as Experience</query>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <fields>["Framework","Route","Template","Experience"]</fields>
+      </table>
+    </panel>
+    <panel>
+      <title>Navigation Comparison</title>
+      <chart>
+        <search base="framework_comparison">
+          <query>| chart max(navigation) as "Splunk navigation entry" by framework</query>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>What This Demonstrates</title>
+      <table>
+        <search base="framework_comparison">
+          <query>| rename framework as Framework, label as "Routing model" | fields Framework "Routing model"</query>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,126 @@
+<dashboard version="2" theme="light">
+  <label>Dashboard Studio Hello</label>
+  <description>A small landing page built with Splunk Dashboard Studio.</description>
+  <definition><![CDATA[
+{
+  "title": "Dashboard Studio Hello",
+  "description": "A small landing page built with Splunk Dashboard Studio.",
+  "visualizations": {
+    "viz_background": {
+      "type": "splunk.rectangle",
+      "options": {
+        "fillColor": "#f6f8fb",
+        "strokeColor": "#d9e2ec",
+        "rx": 8
+      }
+    },
+    "viz_accent": {
+      "type": "splunk.rectangle",
+      "options": {
+        "fillColor": "#006d9c",
+        "strokeColor": "#006d9c",
+        "rx": 8
+      }
+    },
+    "viz_gold": {
+      "type": "splunk.rectangle",
+      "options": {
+        "fillColor": "#f7c948",
+        "strokeColor": "#f7c948",
+        "rx": 8
+      }
+    },
+    "viz_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "###### Dashboard Studio framework\n# Hello from Dashboard Studio\nThis page is defined as a Dashboard Studio dashboard using the `dashboard version=\"2\"` format. Its canvas, shapes, and markdown content are stored in `app/default/data/ui/views/dashboard_studio_hello.xml`, so Splunk can list it directly in the app navigation."
+      }
+    },
+    "viz_note": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**Why this matters**\n\nDashboard Studio gives Splunk dashboards a canvas-based authoring model. It is still a Splunk-native view, but it is structurally different from Simple XML and from the React single page app."
+      }
+    }
+  },
+  "dataSources": {},
+  "layout": {
+    "globalInputs": [],
+    "layoutDefinitions": {
+      "layout_hello": {
+        "type": "absolute",
+        "options": {
+          "width": 1200,
+          "height": 620,
+          "display": "auto-scale"
+        },
+        "structure": [
+          {
+            "item": "viz_background",
+            "type": "block",
+            "position": {
+              "x": 80,
+              "y": 64,
+              "w": 1040,
+              "h": 440
+            }
+          },
+          {
+            "item": "viz_accent",
+            "type": "block",
+            "position": {
+              "x": 120,
+              "y": 116,
+              "w": 22,
+              "h": 310
+            }
+          },
+          {
+            "item": "viz_gold",
+            "type": "block",
+            "position": {
+              "x": 978,
+              "y": 96,
+              "w": 82,
+              "h": 82
+            }
+          },
+          {
+            "item": "viz_title",
+            "type": "block",
+            "position": {
+              "x": 176,
+              "y": 118,
+              "w": 650,
+              "h": 270
+            }
+          },
+          {
+            "item": "viz_note",
+            "type": "block",
+            "position": {
+              "x": 830,
+              "y": 244,
+              "w": 230,
+              "h": 170
+            }
+          }
+        ]
+      }
+    },
+    "options": {},
+    "tabs": {
+      "items": [
+        {
+          "label": "Hello",
+          "layoutId": "layout_hello"
+        }
+      ]
+    }
+  },
+  "applicationProperties": {
+    "collapseNavigation": false
+  }
+}
+  ]]></definition>
+</dashboard>

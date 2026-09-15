@@ -1,5 +1,7 @@
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { useEffect, useState } from 'react';
 import Home from '$pages/Home';
+import ReactOnly from '$pages/ReactOnly';
 
 const theme = createTheme({
   palette: {
@@ -14,10 +16,19 @@ const theme = createTheme({
 });
 
 export default function App() {
+  const [hashPath, setHashPath] = useState(() => window.location.hash);
+
+  useEffect(() => {
+    const handleHashChange = () => setHashPath(window.location.hash);
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Home />
+      {hashPath === '#/react-only' ? <ReactOnly /> : <Home />}
     </ThemeProvider>
   );
 }
